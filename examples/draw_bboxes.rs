@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use usvg::NodeExt;
 
@@ -61,7 +61,7 @@ fn main() {
     for bbox in bboxes {
         rtree.root().append_kind(usvg::NodeKind::Path(usvg::Path {
             stroke: stroke.clone(),
-            data: Rc::new(usvg::PathData::from_rect(bbox)),
+            data: Arc::new(usvg::PathData::from_rect(bbox)),
             .. usvg::Path::default()
         }));
     }
@@ -69,7 +69,7 @@ fn main() {
     for bbox in text_bboxes {
         rtree.root().append_kind(usvg::NodeKind::Path(usvg::Path {
             stroke: stroke2.clone(),
-            data: Rc::new(usvg::PathData::from_rect(bbox)),
+            data: Arc::new(usvg::PathData::from_rect(bbox)),
             .. usvg::Path::default()
         }));
     }

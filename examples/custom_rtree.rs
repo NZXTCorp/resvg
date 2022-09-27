@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use usvg::NodeExt;
 
@@ -44,7 +44,7 @@ fn main() {
 
     rtree.root().append_kind(usvg::NodeKind::Path(usvg::Path {
         fill,
-        data: Rc::new(usvg::PathData::from_rect(usvg::Rect::new(20.0, 20.0, 160.0, 160.0).unwrap())),
+        data: Arc::new(usvg::PathData::from_rect(usvg::Rect::new(20.0, 20.0, 160.0, 160.0).unwrap())),
         .. usvg::Path::default()
     }));
 
