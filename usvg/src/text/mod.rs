@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 mod convert;
 mod shaper;
@@ -289,7 +289,7 @@ fn convert_span(
         stroke: span.stroke.take(),
         rendering_mode: ShapeRendering::default(),
         text_bbox: bboxes_data.bbox().and_then(|r| r.to_rect()),
-        data: Rc::new(path_data),
+        data: Arc::new(path_data),
     };
 
     Some(path)
@@ -317,12 +317,12 @@ fn dump_cluster(
     // Cluster bbox.
     let r = Rect::new(0.0, -cluster.ascent, cluster.advance, cluster.height()).unwrap();
     base_path.stroke = new_stroke(Color::new_rgb(0, 0, 255));
-    base_path.data = Rc::new(PathData::from_rect(r));
+    base_path.data = Arc::new(PathData::from_rect(r));
     parent.append_kind(NodeKind::Path(base_path.clone()));
 
     // Baseline.
     base_path.stroke = new_stroke(Color::new_rgb(255, 0, 0));
-    base_path.data = Rc::new(PathData(vec![
+    base_path.data = Arc::new(PathData(vec![
         PathSegment::MoveTo { x: 0.0,             y: 0.0 },
         PathSegment::LineTo { x: cluster.advance, y: 0.0 },
     ]));
@@ -399,7 +399,7 @@ fn convert_decoration(
         visibility: span.visibility,
         fill: decoration.fill.take(),
         stroke: decoration.stroke.take(),
-        data: Rc::new(path),
+        data: Arc::new(path),
         .. Path::default()
     }
 }

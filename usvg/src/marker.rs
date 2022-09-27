@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use std::f64;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use svgtypes::Length;
 use strict_num::NonZeroPositiveF64;
@@ -118,7 +118,7 @@ fn resolve(
 
         clip_path.append_kind(NodeKind::Path(Path {
             fill: Some(style::Fill::default()),
-            data: Rc::new(PathData::from_rect(clip_rect)),
+            data: Arc::new(PathData::from_rect(clip_rect)),
             ..Path::default()
         }));
 

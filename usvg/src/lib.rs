@@ -126,7 +126,11 @@ mod switch;
 mod units;
 mod use_node;
 
+use std::sync::Arc;
+use std::{fmt::Debug, ops::Deref};
+
 pub use image::ImageHrefResolver;
+use rctree::Borrow;
 pub use svgtypes::{Align, AspectRatio};
 pub use strict_num::{NormalizedF64, NonZeroPositiveF64, PositiveF64, ApproxEq, ApproxEqUlps};
 
@@ -446,7 +450,7 @@ pub struct Path {
     /// Segments list.
     ///
     /// All segments are in absolute coordinates.
-    pub data: std::rc::Rc<PathData>,
+    pub data: Arc<PathData>,
 }
 
 impl Default for Path {
@@ -459,7 +463,7 @@ impl Default for Path {
             stroke: None,
             rendering_mode: ShapeRendering::default(),
             text_bbox: None,
-            data: std::rc::Rc::new(PathData::default()),
+            data: Arc::new(PathData::default()),
         }
     }
 }
@@ -607,13 +611,8 @@ impl Tree {
 
     /// Returns the `Svg` node value.
     #[inline]
-    pub fn svg_node(&self) -> std::cell::Ref<Svg> {
-        std::cell::Ref::map(self.root.borrow(), |v| {
-            match *v {
-                NodeKind::Svg(ref svg) => svg,
-                _ => unreachable!(),
-            }
-        })
+    pub fn svg_node(&self) -> SvgBorrow<'_> {
+        SvgBorrow(self.root.borrow())
     }
 
     /// Returns the `Defs` node.
@@ -697,7 +696,7 @@ pub trait NodeExt {
     ///
     /// If a current node doesn't support ID - an empty string
     /// will be returned.
-    fn id(&self) -> std::cell::Ref<str>;
+    fn id(&self) -> String;
 
     /// Returns node's transform.
     ///
@@ -733,8 +732,8 @@ pub trait NodeExt {
 
 impl NodeExt for Node {
     #[inline]
-    fn id(&self) -> std::cell::Ref<str> {
-        std::cell::Ref::map(self.borrow(), |v| v.id())
+    fn id(&self) -> String {
+        self.borrow().id().to_string()
     }
 
     #[inline]
@@ -841,5 +840,26 @@ fn calc_node_bbox(
             Some(bbox)
         }
         _ => None,
+    }
+}
+
+
+/// A readonly borrow to an SVG node.
+pub struct SvgBorrow<'a>(Borrow<'a, NodeKind>);
+
+impl<'a> Deref for SvgBorrow<'a> {
+    type Target = Svg;
+
+    fn deref(&self) -> &Self::Target {
+        match &*self.0 {
+            NodeKind::Svg(s) => s,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl<'a> Debug for SvgBorrow<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("SvgBorrow").field(&*self.0).finish()
     }
 }

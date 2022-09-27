@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use svgtypes::{Length, LengthUnit};
 
@@ -207,7 +207,7 @@ fn clip_element(
 
     clip_path.append_kind(NodeKind::Path(Path {
         fill: Some(style::Fill::default()),
-        data: Rc::new(PathData::from_rect(clip_rect)),
+        data: Arc::new(PathData::from_rect(clip_rect)),
         ..Path::default()
     }));
 
